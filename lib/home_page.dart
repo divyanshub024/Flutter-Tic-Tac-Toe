@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:tic_tac_toe/single_player_game.dart';
 import 'package:tic_tac_toe/themes.dart';
 import 'package:tic_tac_toe/two_player_game.dart';
 
 import 'circle.dart';
 import 'cross.dart';
+import 'difficulty_level_dialog.dart';
 
 class HomePage extends StatelessWidget {
   @override
@@ -89,10 +89,9 @@ class HomePage extends StatelessWidget {
                     'Single Player',
                     style: TextStyle(color: Colors.white, fontSize: 20.0),
                   ),
-                  onPressed: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => SinglePlayerGame())),
+                  onPressed: () => showDialog(
+                      context: context,
+                      builder: (context) => DifficultyLevelDialog()),
                 ),
               ),
             ),

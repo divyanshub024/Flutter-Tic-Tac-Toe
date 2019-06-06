@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:tic_tac_toe/themes.dart';
 
+import 'ai/EasyAI.dart';
+import 'ai/ai.dart';
 import 'circle.dart';
 import 'cross.dart';
 import 'equal.dart';
@@ -8,6 +10,10 @@ import 'equal.dart';
 enum GameState { Blank, X, O }
 
 class SinglePlayerGame extends StatefulWidget {
+  final GameDifficulty difficulty;
+
+  SinglePlayerGame({this.difficulty});
+
   @override
   _SinglePlayerGameState createState() => _SinglePlayerGameState();
 }
@@ -27,6 +33,7 @@ class _SinglePlayerGameState extends State<SinglePlayerGame>
   int _xWins = 0;
   int _oWins = 0;
   int _draws = 0;
+  var ai;
 
   @override
   void initState() {
@@ -41,7 +48,26 @@ class _SinglePlayerGameState extends State<SinglePlayerGame>
           _boardOpacity = _boardAnimation.value;
         });
       });
+    initAI();
     super.initState();
+  }
+
+  initAI() {
+    switch (widget.difficulty) {
+      case GameDifficulty.Easy:
+        {
+          ai = EasyAI();
+          break;
+        }
+      case GameDifficulty.Medium:
+        {
+          break;
+        }
+      case GameDifficulty.Hard:
+        {
+          break;
+        }
+    }
   }
 
   @override
@@ -230,7 +256,9 @@ class _SinglePlayerGameState extends State<SinglePlayerGame>
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Text(
-                  '1 Player',
+                  widget.difficulty
+                      .toString()
+                      .substring(widget.difficulty.toString().indexOf('.') + 1),
                   style: TextStyle(
                     fontSize: 14.0,
                     color: accentColor,
@@ -252,16 +280,11 @@ class _SinglePlayerGameState extends State<SinglePlayerGame>
 
   Widget gameButton(int row, int col) {
     return GestureDetector(
-      onTap:
-          (boardState[row][col] == GameState.Blank && winner == GameState.Blank)
-              ? () {
-                  _moveCount++;
-                  boardState[row][col] = activePlayer;
-                  checkWinningCondition(row, col, activePlayer);
-                  toggleActivePlayer();
-                  setState(() {});
-                }
-              : null,
+      onTap: (boardState[row][col] == GameState.Blank &&
+              winner == GameState.Blank &&
+              activePlayer == GameState.X)
+          ? () => onGameButtonTap(row, col)
+          : null,
       child: Container(
         color: Colors.white,
         child: Center(
@@ -271,11 +294,27 @@ class _SinglePlayerGameState extends State<SinglePlayerGame>
     );
   }
 
+  onGameButtonTap(row, col) {
+    _moveCount++;
+    boardState[row][col] = activePlayer;
+    checkWinningCondition(row, col, activePlayer);
+    toggleActivePlayer();
+    setState(() {});
+  }
+
   void toggleActivePlayer() {
-    if (activePlayer == GameState.X)
+    if (activePlayer == GameState.X) {
       activePlayer = GameState.O;
-    else
+      playAI();
+    } else
       activePlayer = GameState.X;
+  }
+
+  playAI() {
+    var move = ai.getMove(boardState, 0);
+    var row = move[0];
+    var col = move[1];
+    onGameButtonTap(row, col);
   }
 
   gamePiece(int row, int col) {
